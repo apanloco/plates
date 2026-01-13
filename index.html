@@ -111,13 +111,13 @@
             .btn-add {
                 background: color-mix(
                     in srgb,
-                    var(--pico-ins-color) 18%,
-                    var(--pico-card-background-color) 82%
+                    var(--pico-ins-color) 28%,
+                    var(--pico-card-background-color) 72%
                 );
                 border-color: color-mix(
                     in srgb,
-                    var(--pico-ins-color) 45%,
-                    var(--pico-muted-border-color) 55%
+                    var(--pico-ins-color) 70%,
+                    var(--pico-muted-border-color) 30%
                 );
             }
             .btn-add:hover,
@@ -133,13 +133,13 @@
             .btn-remove {
                 background: color-mix(
                     in srgb,
-                    var(--pico-del-color) 18%,
-                    var(--pico-card-background-color) 82%
+                    var(--pico-del-color) 28%,
+                    var(--pico-card-background-color) 72%
                 );
                 border-color: color-mix(
                     in srgb,
-                    var(--pico-del-color) 45%,
-                    var(--pico-muted-border-color) 55%
+                    var(--pico-del-color) 70%,
+                    var(--pico-muted-border-color) 30%
                 );
             }
             .btn-remove:hover,
@@ -158,10 +158,28 @@
                 color: var(--pico-color);
             }
 
-            /* Input clear buttons should look/size like normal Pico buttons */
+            /* In light mode, use darker glyphs on tinted buttons for better contrast */
+            :root:not([data-theme="dark"]) .btn-add,
+            :root:not([data-theme="dark"]) .btn-remove,
+            :root:not([data-theme="dark"]) .btn-danger {
+                color: var(--pico-h1-color);
+            }
+
+            /* Clear (×) buttons: match the rounded "action button" feel */
             .clear-btn {
-                width: auto;
+                width: var(--pico-form-element-height, 3rem);
                 min-width: var(--pico-form-element-height, 3rem);
+                padding: 0;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                line-height: 1;
+                border-radius: var(--pico-border-radius);
+            }
+
+            /* Make clear buttons feel like an "action" button, not disabled */
+            :root:not([data-theme="dark"]) .clear-btn {
+                color: var(--pico-h1-color);
             }
 
             .plate-footer {
@@ -202,13 +220,13 @@
             .btn-danger {
                 background: color-mix(
                     in srgb,
-                    var(--pico-del-color) 18%,
-                    var(--pico-card-background-color) 82%
+                    var(--pico-del-color) 28%,
+                    var(--pico-card-background-color) 72%
                 );
                 border-color: color-mix(
                     in srgb,
-                    var(--pico-del-color) 45%,
-                    var(--pico-muted-border-color) 55%
+                    var(--pico-del-color) 70%,
+                    var(--pico-muted-border-color) 30%
                 );
                 color: var(--pico-color);
             }
