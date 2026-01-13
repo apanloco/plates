@@ -253,7 +253,7 @@
                         <input
                             id="targetWeight"
                             class="mono"
-                            type="number"
+                            type="text"
                             inputmode="decimal"
                             step="0.5"
                             min="0"
@@ -279,7 +279,7 @@
                         <input
                             id="barWeight"
                             class="mono"
-                            type="number"
+                            type="text"
                             inputmode="decimal"
                             step="0.5"
                             min="0"
@@ -319,7 +319,7 @@
                         <input
                             id="newWeight"
                             class="mono"
-                            type="number"
+                            type="text"
                             inputmode="decimal"
                             step="0.01"
                             placeholder="Weight"
@@ -406,15 +406,28 @@
                     "_" +
                     Date.now().toString(16);
 
+                // Accept comma as decimal separator (notably iOS numpad in some locales).
+                // We only normalize the decimal separator; we do not attempt to handle thousands separators.
+                const normalizeNumberString = (v) => {
+                    if (v == null) return "";
+                    let s = String(v).trim();
+                    if (!s) return "";
+                    s = s.replace(/\s+/g, "");
+                    return s.replace(/,/g, ".");
+                };
+
+                const parseLocaleNumber = (v) =>
+                    Number(normalizeNumberString(v));
+
                 const clampInt = (v) => {
-                    const n = Number(v);
+                    const n = parseLocaleNumber(v);
                     return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0;
                 };
 
                 // Internally compute in "centi-units" (2 decimals) to avoid float edge cases.
                 const SCALE = 100;
                 const toInt = (v) => {
-                    const n = Number(v);
+                    const n = parseLocaleNumber(v);
                     return Number.isFinite(n) ? Math.round(n * SCALE) : NaN;
                 };
                 const fromInt = (n) => n / SCALE;
@@ -834,8 +847,8 @@
                     const targetStr = el.target.value;
                     const barStr = el.bar.value;
 
-                    const target = Number(targetStr);
-                    const bar = Number(barStr);
+                    const target = parseLocaleNumber(targetStr);
+                    const bar = parseLocaleNumber(barStr);
 
                     if (
                         targetStr === "" ||
@@ -860,7 +873,7 @@
                 }
 
                 function addOrMergePlate(weight, available) {
-                    const w = Number(weight);
+                    const w = parseLocaleNumber(weight);
                     if (!Number.isFinite(w) || !(w > 0)) return false;
 
                     const a = clampInt(
@@ -907,7 +920,9 @@
 
                     el.bar.addEventListener("input", () => {
                         state.barWeight =
-                            el.bar.value === "" ? "" : Number(el.bar.value);
+                            el.bar.value === ""
+                                ? ""
+                                : parseLocaleNumber(el.bar.value);
                         scheduleRecalc();
                     });
 
