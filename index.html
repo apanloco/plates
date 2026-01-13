@@ -1,0 +1,1018 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <meta name="color-scheme" content="light dark" />
+        <title>Plates</title>
+
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1.1/css/pico.min.css"
+        />
+
+        <style>
+            :root {
+                --app-max: 860px;
+                --plate-cols: 1fr 1.2fr 3.25rem;
+                --plate-cols-sm: 1fr 1fr 3.15rem;
+            }
+
+            main.container {
+                max-width: var(--app-max);
+                padding-inline: 1rem;
+            }
+            @media (max-width: 380px) {
+                main.container {
+                    padding-inline: 0.75rem;
+                }
+            }
+
+            .muted {
+                opacity: 0.75;
+            }
+            .mono {
+                font-variant-numeric: tabular-nums;
+            }
+            .spacer {
+                height: 0.6rem;
+            }
+
+            .plate-table {
+                border: 1px solid var(--pico-muted-border-color);
+                border-radius: var(--pico-border-radius);
+                overflow: hidden;
+                background: var(--pico-card-background-color);
+            }
+
+            .plate-head,
+            .plate-row {
+                display: grid;
+                grid-template-columns: var(--plate-cols);
+                gap: 0.6rem;
+                align-items: center;
+                padding: 0.6rem 0.75rem;
+            }
+
+            .plate-head {
+                background: color-mix(
+                    in srgb,
+                    var(--pico-card-background-color) 75%,
+                    var(--pico-muted-color) 25%
+                );
+                font-weight: 600;
+                border-bottom: 1px solid var(--pico-muted-border-color);
+            }
+
+            .plate-row + .plate-row {
+                border-top: 1px solid var(--pico-muted-border-color);
+            }
+
+            .plate-row input[type="number"],
+            .plate-row button {
+                margin: 0;
+            }
+
+            .plate-row > :nth-child(2),
+            .plate-row > :nth-child(3) {
+                display: flex;
+                align-items: center;
+            }
+
+            /* Match Pico's group alignment: input stretches, action button hugs right edge */
+            .plate-row > :nth-child(2) {
+                width: 100%;
+            }
+            .plate-row > :nth-child(2) input {
+                flex: 1;
+                width: 100%;
+            }
+            .plate-row > :nth-child(3) {
+                justify-content: flex-end;
+            }
+
+            /* Force the action button (3rd column) to hug the right edge consistently */
+            .plate-row > :nth-child(3) button,
+            .plate-footer > :nth-child(3) button {
+                margin-left: auto;
+            }
+
+            .icon-btn {
+                height: var(--pico-form-element-height, 3rem);
+                width: var(--pico-form-element-height, 3rem);
+                padding: 0;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                line-height: 1;
+            }
+
+            /* Subtle background tints (not text) for add/remove */
+            .btn-add {
+                background: color-mix(
+                    in srgb,
+                    var(--pico-ins-color) 18%,
+                    var(--pico-card-background-color) 82%
+                );
+                border-color: color-mix(
+                    in srgb,
+                    var(--pico-ins-color) 45%,
+                    var(--pico-muted-border-color) 55%
+                );
+            }
+            .btn-add:hover,
+            .btn-add:focus {
+                background: color-mix(
+                    in srgb,
+                    var(--pico-ins-color) 26%,
+                    var(--pico-card-background-color) 74%
+                );
+                border-color: var(--pico-ins-color);
+            }
+
+            .btn-remove {
+                background: color-mix(
+                    in srgb,
+                    var(--pico-del-color) 18%,
+                    var(--pico-card-background-color) 82%
+                );
+                border-color: color-mix(
+                    in srgb,
+                    var(--pico-del-color) 45%,
+                    var(--pico-muted-border-color) 55%
+                );
+            }
+            .btn-remove:hover,
+            .btn-remove:focus {
+                background: color-mix(
+                    in srgb,
+                    var(--pico-del-color) 26%,
+                    var(--pico-card-background-color) 74%
+                );
+                border-color: var(--pico-del-color);
+            }
+
+            /* Keep glyph color consistent with Pico's secondary buttons */
+            .btn-add,
+            .btn-remove {
+                color: var(--pico-color);
+            }
+
+            /* Input clear buttons should look/size like normal Pico buttons */
+            .clear-btn {
+                width: auto;
+                min-width: var(--pico-form-element-height, 3rem);
+            }
+
+            .plate-footer {
+                display: grid;
+                grid-template-columns: var(--plate-cols);
+                gap: 0.6rem;
+                align-items: center;
+                padding: 0.6rem 0.75rem;
+                border-top: 1px solid var(--pico-muted-border-color);
+                background: var(--pico-card-background-color);
+            }
+
+            .plate-footer input[type="number"],
+            .plate-footer button {
+                margin: 0;
+            }
+
+            /* Footer row: make inputs stretch like rows, and keep the + pinned right */
+            .plate-footer > :nth-child(2) {
+                width: 100%;
+            }
+            .plate-footer > :nth-child(3) {
+                justify-self: end;
+            }
+
+            .result-wrap {
+                display: grid;
+                gap: 0.35rem;
+            }
+            .result-main {
+                font-size: 1.35rem;
+            }
+            .danger {
+                color: var(--pico-del-color);
+            }
+
+            /* Background-tinted destructive button (used for Reset) */
+            .btn-danger {
+                background: color-mix(
+                    in srgb,
+                    var(--pico-del-color) 18%,
+                    var(--pico-card-background-color) 82%
+                );
+                border-color: color-mix(
+                    in srgb,
+                    var(--pico-del-color) 45%,
+                    var(--pico-muted-border-color) 55%
+                );
+                color: var(--pico-color);
+            }
+            .btn-danger:hover,
+            .btn-danger:focus {
+                background: color-mix(
+                    in srgb,
+                    var(--pico-del-color) 26%,
+                    var(--pico-card-background-color) 74%
+                );
+                border-color: var(--pico-del-color);
+            }
+
+            @media (max-width: 520px) {
+                .plate-head,
+                .plate-row,
+                .plate-footer {
+                    padding: 0.55rem 0.6rem;
+                    gap: 0.5rem;
+                    grid-template-columns: var(--plate-cols-sm);
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <main class="container">
+            <header>
+                <h1>Plates</h1>
+                <p class="muted">
+                    Finds the smallest total weight that is ≥ your target.
+                    Unit-agnostic (pick one unit system and stick to it).
+                </p>
+            </header>
+
+            <article>
+                <h2>Inputs</h2>
+
+                <div>
+                    <label for="targetWeight">Total</label>
+                    <div role="group">
+                        <input
+                            id="targetWeight"
+                            class="mono"
+                            type="number"
+                            inputmode="decimal"
+                            step="0.5"
+                            min="0"
+                            placeholder="e.g. 112"
+                        />
+                        <button
+                            id="clearTarget"
+                            type="button"
+                            class="clear-btn"
+                            aria-label="Clear total"
+                            title="Clear"
+                        >
+                            ×
+                        </button>
+                    </div>
+                </div>
+
+                <div class="spacer"></div>
+
+                <div>
+                    <label for="barWeight">Bar</label>
+                    <div role="group">
+                        <input
+                            id="barWeight"
+                            class="mono"
+                            type="number"
+                            inputmode="decimal"
+                            step="0.5"
+                            min="0"
+                            placeholder="e.g. 25"
+                        />
+                        <button
+                            id="clearBar"
+                            type="button"
+                            class="clear-btn"
+                            aria-label="Clear bar"
+                            title="Clear"
+                        >
+                            ×
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+            <article>
+                <h2 style="margin-bottom: 0.35rem">Result</h2>
+                <div id="results" aria-live="polite" aria-atomic="true"></div>
+            </article>
+
+            <article>
+                <h2>Plates</h2>
+
+                <div class="plate-table">
+                    <div class="plate-head">
+                        <div>Weight</div>
+                        <div>Available</div>
+                        <div></div>
+                    </div>
+
+                    <div id="inventory"></div>
+
+                    <div class="plate-footer" aria-label="Add plate">
+                        <input
+                            id="newWeight"
+                            class="mono"
+                            type="number"
+                            inputmode="decimal"
+                            step="0.01"
+                            placeholder="Weight"
+                            aria-label="New plate weight"
+                        />
+                        <input
+                            id="newAvailable"
+                            class="mono"
+                            type="number"
+                            inputmode="numeric"
+                            step="1"
+                            min="0"
+                            placeholder="Available"
+                            aria-label="New plate available"
+                        />
+                        <button
+                            id="addPlate"
+                            type="button"
+                            class="secondary icon-btn btn-add"
+                            aria-label="Add plate"
+                            title="Add"
+                        >
+                            +
+                        </button>
+                    </div>
+                </div>
+            </article>
+
+            <footer class="muted">
+                <div
+                    style="
+                        display: flex;
+                        justify-content: flex-end;
+                        padding-top: 0.75rem;
+                    "
+                >
+                    <button id="resetApp" type="button" class="btn-danger">
+                        Reset
+                    </button>
+                </div>
+            </footer>
+        </main>
+
+        <script>
+            (() => {
+                "use strict";
+
+                // ---- config ----
+                const STORAGE_KEY = "weightsAppSettings.v7";
+                const DEFAULT_PLATES = [25, 20, 15, 10, 5, 2.5, 1.5, 1.25];
+                const DEFAULT_AVAILABLE = 4;
+                const DEFAULT_BAR = 25;
+                const DEFAULT_TARGET = 112;
+
+                // ---- dom ----
+                const $ = (id) => document.getElementById(id);
+                const el = {
+                    target: $("targetWeight"),
+                    bar: $("barWeight"),
+                    clearTarget: $("clearTarget"),
+                    clearBar: $("clearBar"),
+
+                    inventory: $("inventory"),
+                    results: $("results"),
+
+                    newWeight: $("newWeight"),
+                    newAvailable: $("newAvailable"),
+                    addPlate: $("addPlate"),
+
+                    reset: $("resetApp"),
+                };
+
+                // ---- state ----
+                let state = {
+                    targetWeight: String(DEFAULT_TARGET),
+                    barWeight: DEFAULT_BAR,
+                    plates: [], // {id, weight:number, available:int}
+                };
+
+                // ---- utils ----
+                const uid = () =>
+                    "p_" +
+                    Math.random().toString(16).slice(2) +
+                    "_" +
+                    Date.now().toString(16);
+
+                const clampInt = (v) => {
+                    const n = Number(v);
+                    return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0;
+                };
+
+                // Internally compute in "centi-units" (2 decimals) to avoid float edge cases.
+                const SCALE = 100;
+                const toInt = (v) => {
+                    const n = Number(v);
+                    return Number.isFinite(n) ? Math.round(n * SCALE) : NaN;
+                };
+                const fromInt = (n) => n / SCALE;
+
+                const fmt = (n) => {
+                    if (!Number.isFinite(n)) return "—";
+                    const s = (Math.round(n * 100) / 100).toFixed(2);
+                    return s.replace(/\.00$/, "").replace(/(\.\d)0$/, "$1");
+                };
+
+                const byWeightDesc = (a, b) => b.weight - a.weight;
+
+                const initialPlates = () =>
+                    DEFAULT_PLATES.map((w) => ({
+                        id: uid(),
+                        weight: w,
+                        available: DEFAULT_AVAILABLE,
+                    })).sort(byWeightDesc);
+
+                function normalizePlates(plates) {
+                    return plates
+                        .filter(
+                            (p) =>
+                                Number.isFinite(p.weight) &&
+                                p.weight > 0 &&
+                                clampInt(p.available) >= 0,
+                        )
+                        .map((p) => ({
+                            id: p.id || uid(),
+                            weight: Number(p.weight),
+                            available: clampInt(p.available),
+                        }))
+                        .sort(byWeightDesc);
+                }
+
+                // ---- persistence ----
+                function save() {
+                    const payload = {
+                        targetWeight: state.targetWeight,
+                        barWeight: state.barWeight,
+                        plates: state.plates.map((p) => ({
+                            id: p.id,
+                            weight: p.weight,
+                            available: p.available,
+                        })),
+                    };
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+                }
+
+                function resetStateToDefaults() {
+                    state = {
+                        targetWeight: String(DEFAULT_TARGET),
+                        barWeight: DEFAULT_BAR,
+                        plates: initialPlates(),
+                    };
+                }
+
+                function load() {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (!raw) {
+                        resetStateToDefaults();
+                        return;
+                    }
+                    try {
+                        const parsed = JSON.parse(raw);
+                        state.targetWeight =
+                            parsed.targetWeight ?? String(DEFAULT_TARGET);
+                        state.barWeight =
+                            parsed.barWeight === "" || parsed.barWeight == null
+                                ? ""
+                                : Number(parsed.barWeight ?? DEFAULT_BAR);
+
+                        const plates = Array.isArray(parsed.plates)
+                            ? parsed.plates
+                            : [];
+                        state.plates = normalizePlates(plates);
+                        if (!state.plates.length)
+                            state.plates = initialPlates();
+                    } catch {
+                        resetStateToDefaults();
+                    }
+                }
+
+                function syncInputs() {
+                    el.target.value = state.targetWeight;
+                    el.bar.value =
+                        state.barWeight === ""
+                            ? ""
+                            : Number.isFinite(state.barWeight)
+                              ? state.barWeight
+                              : "";
+                    el.newWeight.value = "";
+                    el.newAvailable.value = String(DEFAULT_AVAILABLE);
+                }
+
+                // ---- solver ----
+
+                function computeBest(targetTotal, barWeight, plates) {
+                    if (
+                        !Number.isFinite(targetTotal) ||
+                        !Number.isFinite(barWeight)
+                    )
+                        return { kind: "invalid" };
+
+                    // Treat negative inputs as invalid (nonsensical weights).
+                    if (targetTotal < 0 || barWeight < 0)
+                        return { kind: "invalid" };
+
+                    // Convert to integer "centi-units" for exact comparisons.
+                    const targetI = toInt(targetTotal);
+                    const barI = toInt(barWeight);
+                    if (!Number.isFinite(targetI) || !Number.isFinite(barI))
+                        return { kind: "invalid" };
+
+                    const needTotalI = Math.max(0, targetI - barI);
+
+                    // If target is below bar, the minimum achievable is the bar alone.
+                    if (needTotalI <= 0) {
+                        return {
+                            kind: "below-bar",
+                            targetTotal,
+                            achievedTotal: barWeight,
+                            overBy: barWeight - targetTotal,
+                            usagePerSide: [],
+                        };
+                    }
+
+                    // Must be symmetric: per-side requirement must be integer.
+                    if (needTotalI % 2 !== 0) {
+                        // We can still solve by finding the smallest >= target.
+                        // Equivalent to rounding the per-side requirement up to the next integer.
+                    }
+                    const needPerSideI = Math.ceil(needTotalI / 2);
+
+                    const types = plates
+                        .map((p) => ({
+                            wI: toInt(p.weight),
+                            w: Number(p.weight),
+                            maxPerSide: Math.floor(clampInt(p.available) / 2),
+                            hasOddRemainder: clampInt(p.available) % 2 === 1,
+                        }))
+                        .filter(
+                            (t) =>
+                                Number.isFinite(t.wI) &&
+                                t.wI > 0 &&
+                                t.maxPerSide > 0,
+                        )
+                        .sort((a, b) => b.wI - a.wI);
+
+                    let maxSumI = 0;
+                    for (const t of types) maxSumI += t.wI * t.maxPerSide;
+                    if (maxSumI < needPerSideI) return { kind: "no-solution" };
+
+                    // Greedy upper bound in integer space
+                    const greedy = (() => {
+                        let sumI = 0;
+                        let platesCount = 0;
+                        let distinct = 0;
+                        const usageCounts = new Array(types.length).fill(0);
+
+                        for (let i = 0; i < types.length; i++) {
+                            if (sumI >= needPerSideI) break;
+                            const t = types[i];
+                            const remainingI = Math.max(0, needPerSideI - sumI);
+                            const take = Math.min(
+                                t.maxPerSide,
+                                Math.ceil(remainingI / t.wI),
+                            );
+                            if (take > 0) {
+                                usageCounts[i] = take;
+                                sumI += take * t.wI;
+                                platesCount += take;
+                                distinct++;
+                            }
+                        }
+                        if (sumI < needPerSideI) return null;
+                        return {
+                            sumI,
+                            platesPerSide: platesCount,
+                            distinct,
+                            usageCounts,
+                        };
+                    })();
+
+                    if (!greedy) return { kind: "no-solution" };
+
+                    let best = {
+                        sumI: greedy.sumI,
+                        overI: greedy.sumI - needPerSideI,
+                        platesPerSide: greedy.platesPerSide,
+                        distinct: greedy.distinct,
+                        usageCounts: greedy.usageCounts,
+                    };
+
+                    const usage = new Array(types.length).fill(0);
+
+                    const better = (cand) => {
+                        if (cand.overI < best.overI) return true;
+                        if (cand.overI === best.overI) {
+                            if (cand.platesPerSide < best.platesPerSide)
+                                return true;
+                            if (cand.platesPerSide === best.platesPerSide) {
+                                if (cand.distinct < best.distinct) return true;
+                                if (cand.distinct === best.distinct) {
+                                    // Prefer heavier plates when otherwise identical (types are sorted desc)
+                                    for (
+                                        let i = 0;
+                                        i < cand.usageCounts.length;
+                                        i++
+                                    ) {
+                                        if (
+                                            cand.usageCounts[i] !==
+                                            best.usageCounts[i]
+                                        )
+                                            return (
+                                                cand.usageCounts[i] >
+                                                best.usageCounts[i]
+                                            );
+                                    }
+                                }
+                            }
+                        }
+                        return false;
+                    };
+
+                    function dfs(i, sumI, platesPerSide, distinct) {
+                        if (sumI >= needPerSideI) {
+                            const cand = {
+                                sumI,
+                                overI: sumI - needPerSideI,
+                                platesPerSide,
+                                distinct,
+                                usageCounts: usage.slice(),
+                            };
+                            if (better(cand)) best = cand;
+                            return;
+                        }
+                        if (i >= types.length) return;
+
+                        const t = types[i];
+
+                        // Branch cap using current best.
+                        const capSumI = needPerSideI + best.overI;
+                        const byBest = Math.ceil((capSumI - sumI) / t.wI);
+                        const maxUse = Math.max(
+                            0,
+                            Math.min(t.maxPerSide, byBest),
+                        );
+
+                        for (let c = maxUse; c >= 0; c--) {
+                            usage[i] = c;
+
+                            const newSumI = sumI + c * t.wI;
+                            const newPlates = platesPerSide + c;
+                            const newDistinct = distinct + (c ? 1 : 0);
+
+                            if (newSumI >= needPerSideI) {
+                                const overI = newSumI - needPerSideI;
+                                if (overI > best.overI) continue;
+                                if (
+                                    overI === best.overI &&
+                                    newPlates > best.platesPerSide
+                                )
+                                    continue;
+                                if (
+                                    overI === best.overI &&
+                                    newPlates === best.platesPerSide &&
+                                    newDistinct > best.distinct
+                                )
+                                    continue;
+                            }
+
+                            dfs(i + 1, newSumI, newPlates, newDistinct);
+                        }
+                        usage[i] = 0;
+                    }
+
+                    dfs(0, 0, 0, 0);
+
+                    const usagePerSide = [];
+                    for (let i = 0; i < types.length; i++) {
+                        const c = best.usageCounts[i];
+                        if (c > 0)
+                            usagePerSide.push({
+                                weight: types[i].w,
+                                perSideCount: c,
+                            });
+                    }
+
+                    const achievedTotalI = barI + 2 * best.sumI;
+                    const achievedTotal = fromInt(achievedTotalI);
+                    const overBy = achievedTotal - targetTotal;
+
+                    // Informational: any odd plate availability means something gets ignored.
+                    const hasOdd = plates.some(
+                        (p) => clampInt(p.available) % 2 === 1,
+                    );
+
+                    return {
+                        kind: "ok",
+                        targetTotal,
+                        achievedTotal,
+                        overBy,
+                        usagePerSide,
+                        noteOddPairsIgnored: hasOdd,
+                    };
+                }
+
+                // ---- render ----
+                function renderResults(r) {
+                    if (
+                        el.target.value === "" ||
+                        el.bar.value === "" ||
+                        r.kind === "invalid"
+                    ) {
+                        el.results.innerHTML = '<p class="muted">—</p>';
+                        return;
+                    }
+                    if (r.kind === "no-solution") {
+                        el.results.innerHTML =
+                            "<p><strong>No solution</strong></p>";
+                        return;
+                    }
+
+                    const perSide = [];
+                    for (const u of r.usagePerSide)
+                        for (let i = 0; i < u.perSideCount; i++)
+                            perSide.push(fmt(u.weight));
+                    const platesStr = perSide.length
+                        ? perSide.join(" + ")
+                        : "(no plates)";
+
+                    const totals = r.usagePerSide.map(
+                        (u) => `${fmt(u.weight)}×${u.perSideCount * 2}`,
+                    );
+                    const totalsStr = totals.length
+                        ? totals.join(", ")
+                        : "(no plates)";
+
+                    const exact = Math.abs(r.overBy) <= 1e-9;
+
+                    const noteBelowBar =
+                        r.kind === "below-bar"
+                            ? `<div class="muted">Target is below bar weight; minimum achievable is the bar alone.</div>`
+                            : "";
+                    const notePairs = r.noteOddPairsIgnored
+                        ? `<div class="muted">Note: only pairs are usable; any odd single plate is ignored.</div>`
+                        : "";
+
+                    el.results.innerHTML = `
+            <div class="result-wrap">
+              <div class="result-main mono"><strong>= ${fmt(r.achievedTotal)}</strong></div>
+              <div class="mono">Per side: ${platesStr}</div>
+              <div class="mono muted">Total plates: ${totalsStr}</div>
+              ${noteBelowBar}
+              ${notePairs}
+              ${
+                  exact
+                      ? ""
+                      : `<div class="danger">Over by: <span class="mono">${fmt(r.overBy)}</span></div>`
+              }
+            </div>
+          `;
+                }
+
+                function renderInventory() {
+                    el.inventory.textContent = "";
+                    const frag = document.createDocumentFragment();
+
+                    for (const p of state.plates) {
+                        const row = document.createElement("div");
+                        row.className = "plate-row";
+                        row.dataset.id = p.id;
+
+                        const w = document.createElement("div");
+                        const strong = document.createElement("strong");
+                        strong.className = "mono";
+                        strong.textContent = fmt(p.weight);
+                        w.append(strong);
+
+                        const a = document.createElement("div");
+                        const input = document.createElement("input");
+                        input.type = "number";
+                        input.inputMode = "numeric";
+                        input.step = "2";
+                        input.min = "0";
+                        input.className = "mono";
+                        input.value = String(p.available);
+                        input.setAttribute("data-action", "setAvailable");
+                        input.setAttribute(
+                            "aria-label",
+                            `Available for ${fmt(p.weight)}`,
+                        );
+                        a.append(input);
+
+                        const x = document.createElement("div");
+                        const btn = document.createElement("button");
+                        btn.type = "button";
+                        btn.className = "secondary icon-btn btn-remove";
+                        btn.setAttribute("data-action", "removePlate");
+                        btn.setAttribute(
+                            "aria-label",
+                            `Remove ${fmt(p.weight)} plate`,
+                        );
+                        btn.textContent = "×";
+                        x.append(btn);
+
+                        row.append(w, a, x);
+                        frag.append(row);
+                    }
+
+                    el.inventory.append(frag);
+                }
+
+                // ---- actions ----
+                function recalcAndRender() {
+                    const targetStr = el.target.value;
+                    const barStr = el.bar.value;
+
+                    const target = Number(targetStr);
+                    const bar = Number(barStr);
+
+                    if (
+                        targetStr === "" ||
+                        barStr === "" ||
+                        !Number.isFinite(target) ||
+                        !Number.isFinite(bar)
+                    ) {
+                        renderResults({ kind: "invalid" });
+                        return;
+                    }
+
+                    renderResults(computeBest(target, bar, state.plates));
+                }
+
+                let debounceTimer = 0;
+                function scheduleRecalc() {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => {
+                        save();
+                        recalcAndRender();
+                    }, 60);
+                }
+
+                function addOrMergePlate(weight, available) {
+                    const w = Number(weight);
+                    if (!Number.isFinite(w) || !(w > 0)) return false;
+
+                    const a = clampInt(
+                        available === "" ? DEFAULT_AVAILABLE : available,
+                    );
+
+                    const existing = state.plates.find(
+                        (p) => toInt(p.weight) === toInt(w),
+                    );
+                    if (existing) {
+                        existing.available = a;
+                    } else {
+                        state.plates.push({
+                            id: uid(),
+                            weight: w,
+                            available: a,
+                        });
+                        state.plates.sort(byWeightDesc);
+                    }
+                    return true;
+                }
+
+                function submitNewPlate() {
+                    const ok = addOrMergePlate(
+                        el.newWeight.value,
+                        el.newAvailable.value,
+                    );
+                    if (!ok) {
+                        el.newWeight.focus();
+                        return;
+                    }
+                    el.newWeight.value = "";
+                    el.newWeight.focus();
+                    renderInventory();
+                    scheduleRecalc();
+                }
+
+                // ---- events ----
+                function wire() {
+                    el.target.addEventListener("input", () => {
+                        state.targetWeight = el.target.value;
+                        scheduleRecalc();
+                    });
+
+                    el.bar.addEventListener("input", () => {
+                        state.barWeight =
+                            el.bar.value === "" ? "" : Number(el.bar.value);
+                        scheduleRecalc();
+                    });
+
+                    el.clearTarget.addEventListener("click", () => {
+                        el.target.value = "";
+                        state.targetWeight = "";
+                        el.target.focus();
+                        scheduleRecalc();
+                    });
+
+                    el.clearBar.addEventListener("click", () => {
+                        el.bar.value = "";
+                        state.barWeight = "";
+                        el.bar.focus();
+                        scheduleRecalc();
+                    });
+
+                    el.addPlate.addEventListener("click", submitNewPlate);
+
+                    el.reset.addEventListener("click", () => {
+                        localStorage.removeItem(STORAGE_KEY);
+                        resetStateToDefaults();
+                        syncInputs();
+                        renderInventory();
+                        recalcAndRender();
+                        save();
+                    });
+
+                    el.inventory.addEventListener("input", (e) => {
+                        const row = e.target.closest(".plate-row");
+                        if (!row) return;
+
+                        const p = state.plates.find(
+                            (x) => x.id === row.dataset.id,
+                        );
+                        if (!p) return;
+
+                        if (e.target.dataset.action === "setAvailable") {
+                            // Update state while typing, but don't force rounding yet.
+                            p.available = clampInt(e.target.value);
+                            scheduleRecalc();
+                        }
+                    });
+
+                    // Round to usable pairs only when the user leaves the field.
+                    el.inventory.addEventListener("focusout", (e) => {
+                        if (e.target?.dataset?.action !== "setAvailable")
+                            return;
+
+                        const row = e.target.closest(".plate-row");
+                        if (!row) return;
+
+                        const p = state.plates.find(
+                            (x) => x.id === row.dataset.id,
+                        );
+                        if (!p) return;
+
+                        const n = clampInt(e.target.value);
+                        const even = n - (n % 2);
+                        p.available = even;
+
+                        if (e.target.value !== String(even)) {
+                            e.target.value = String(even);
+                        }
+
+                        scheduleRecalc();
+                    });
+
+                    el.inventory.addEventListener("click", (e) => {
+                        const btn =
+                            e.target.closest && e.target.closest("button");
+                        if (!btn) return;
+
+                        const row = btn.closest(".plate-row");
+                        if (!row) return;
+
+                        if (btn.dataset.action === "removePlate") {
+                            const id = row.dataset.id;
+                            state.plates = state.plates.filter(
+                                (p) => p.id !== id,
+                            );
+                            renderInventory();
+                            scheduleRecalc();
+                        }
+                    });
+
+                    // Escape clears focused input (total/bar/new weight/new available)
+                    document.addEventListener("keydown", (e) => {
+                        if (e.key !== "Escape") return;
+                        const a = document.activeElement;
+                        if (a === el.target) el.clearTarget.click();
+                        else if (a === el.bar) el.clearBar.click();
+                        else if (a === el.newWeight) el.newWeight.value = "";
+                        else if (a === el.newAvailable)
+                            el.newAvailable.value = String(DEFAULT_AVAILABLE);
+                    });
+                }
+
+                // ---- init ----
+                load();
+                syncInputs();
+                renderInventory();
+                wire();
+                recalcAndRender();
+            })();
+        </script>
+    </body>
+</html>
