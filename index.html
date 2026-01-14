@@ -121,11 +121,13 @@
                 );
             }
             .btn-add:hover,
-            .btn-add:focus {
+            .btn-add:focus,
+            .clear-btn:hover,
+            .clear-btn:focus {
                 background: color-mix(
                     in srgb,
-                    var(--pico-ins-color) 26%,
-                    var(--pico-card-background-color) 74%
+                    var(--pico-ins-color) 40%,
+                    var(--pico-card-background-color) 60%
                 );
                 border-color: var(--pico-ins-color);
             }
@@ -146,8 +148,8 @@
             .btn-remove:focus {
                 background: color-mix(
                     in srgb,
-                    var(--pico-del-color) 26%,
-                    var(--pico-card-background-color) 74%
+                    var(--pico-del-color) 40%,
+                    var(--pico-card-background-color) 60%
                 );
                 border-color: var(--pico-del-color);
             }
@@ -175,34 +177,32 @@
                 justify-content: center;
                 line-height: 1;
                 border-radius: var(--pico-border-radius);
+
+                /* Match the "add row" button styling (green-tinted) */
+                background: color-mix(
+                    in srgb,
+                    var(--pico-ins-color) 18%,
+                    var(--pico-card-background-color) 82%
+                );
+                border-color: var(--pico-ins-color);
+                color: var(--pico-color);
             }
 
-            /* Make clear buttons feel like an "action" button, not disabled */
+            /* In light mode, use darker glyphs on tinted buttons for better contrast */
             :root:not([data-theme="dark"]) .clear-btn {
                 color: var(--pico-h1-color);
             }
 
+            /* Make the "add plate" row look/behave like a regular `.plate-row` */
             .plate-footer {
-                display: grid;
-                grid-template-columns: var(--plate-cols);
-                gap: 0.6rem;
-                align-items: center;
-                padding: 0.6rem 0.75rem;
                 border-top: 1px solid var(--pico-muted-border-color);
                 background: var(--pico-card-background-color);
             }
 
-            .plate-footer input[type="number"],
+            /* Ensure all form controls in the add row match row spacing */
+            .plate-footer input,
             .plate-footer button {
                 margin: 0;
-            }
-
-            /* Footer row: make inputs stretch like rows, and keep the + pinned right */
-            .plate-footer > :nth-child(2) {
-                width: 100%;
-            }
-            .plate-footer > :nth-child(3) {
-                justify-self: end;
             }
 
             .result-wrap {
@@ -234,8 +234,8 @@
             .btn-danger:focus {
                 background: color-mix(
                     in srgb,
-                    var(--pico-del-color) 26%,
-                    var(--pico-card-background-color) 74%
+                    var(--pico-del-color) 40%,
+                    var(--pico-card-background-color) 60%
                 );
                 border-color: var(--pico-del-color);
             }
@@ -333,35 +333,41 @@
 
                     <div id="inventory"></div>
 
-                    <div class="plate-footer" aria-label="Add plate">
-                        <input
-                            id="newWeight"
-                            class="mono"
-                            type="text"
-                            inputmode="decimal"
-                            step="0.01"
-                            placeholder="Weight"
-                            aria-label="New plate weight"
-                        />
-                        <input
-                            id="newAvailable"
-                            class="mono"
-                            type="number"
-                            inputmode="numeric"
-                            step="1"
-                            min="0"
-                            placeholder="Available"
-                            aria-label="New plate available"
-                        />
-                        <button
-                            id="addPlate"
-                            type="button"
-                            class="secondary icon-btn btn-add"
-                            aria-label="Add plate"
-                            title="Add"
-                        >
-                            +
-                        </button>
+                    <div class="plate-row plate-footer" aria-label="Add plate">
+                        <div>
+                            <input
+                                id="newWeight"
+                                class="mono"
+                                type="text"
+                                inputmode="decimal"
+                                step="0.01"
+                                placeholder="Weight"
+                                aria-label="New plate weight"
+                            />
+                        </div>
+                        <div>
+                            <input
+                                id="newAvailable"
+                                class="mono"
+                                type="number"
+                                inputmode="numeric"
+                                step="1"
+                                min="0"
+                                placeholder="Available"
+                                aria-label="New plate available"
+                            />
+                        </div>
+                        <div>
+                            <button
+                                id="addPlate"
+                                type="button"
+                                class="secondary icon-btn btn-add"
+                                aria-label="Add plate"
+                                title="Add"
+                            >
+                                +
+                            </button>
+                        </div>
                     </div>
                 </div>
             </article>
@@ -387,8 +393,19 @@
 
                 // ---- config ----
                 const STORAGE_KEY = "weightsAppSettings.v7";
-                const DEFAULT_PLATES = [25, 20, 15, 10, 5, 2.5, 1.5, 1.25];
-                const DEFAULT_AVAILABLE = 4;
+
+                // tuple format: [weight, availableTotal]
+                const DEFAULT_INVENTORY = [
+                    [25, 4],
+                    [20, 4],
+                    [15, 4],
+                    [10, 4],
+                    [5, 8],
+                    [2.5, 8],
+                    [1.5, 8],
+                    [1.25, 8],
+                ];
+
                 const DEFAULT_BAR = 25;
                 const DEFAULT_TARGET = 112;
 
@@ -459,10 +476,10 @@
                 const byWeightDesc = (a, b) => b.weight - a.weight;
 
                 const initialPlates = () =>
-                    DEFAULT_PLATES.map((w) => ({
+                    DEFAULT_INVENTORY.map(([w, available]) => ({
                         id: uid(),
                         weight: w,
-                        available: DEFAULT_AVAILABLE,
+                        available,
                     })).sort(byWeightDesc);
 
                 function normalizePlates(plates) {
@@ -538,7 +555,7 @@
                               ? state.barWeight
                               : "";
                     el.newWeight.value = "";
-                    el.newAvailable.value = String(DEFAULT_AVAILABLE);
+                    el.newAvailable.value = "0";
                 }
 
                 // ---- solver ----
@@ -894,9 +911,7 @@
                     const w = parseLocaleNumber(weight);
                     if (!Number.isFinite(w) || !(w > 0)) return false;
 
-                    const a = clampInt(
-                        available === "" ? DEFAULT_AVAILABLE : available,
-                    );
+                    const a = clampInt(available === "" ? 0 : available);
 
                     const existing = state.plates.find(
                         (p) => toInt(p.weight) === toInt(w),
@@ -1035,7 +1050,7 @@
                         else if (a === el.bar) el.clearBar.click();
                         else if (a === el.newWeight) el.newWeight.value = "";
                         else if (a === el.newAvailable)
-                            el.newAvailable.value = String(DEFAULT_AVAILABLE);
+                            el.newAvailable.value = "0";
                     });
                 }
 
