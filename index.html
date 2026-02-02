@@ -649,55 +649,32 @@
 
                     if (!greedy) return { kind: "no-solution" };
 
-                    let best = {
-                        sumI: greedy.sumI,
-                        overI: greedy.sumI - needPerSideI,
-                        platesPerSide: greedy.platesPerSide,
-                        distinct: greedy.distinct,
-                        usageCounts: greedy.usageCounts,
-                    };
+                    let bestOverI = greedy.sumI - needPerSideI;
+                    let bestPlatesPerSide = greedy.platesPerSide;
+                    let bestSolutions = [greedy.usageCounts];
+                    const seenSolutions = new Set();
+                    seenSolutions.add(greedy.usageCounts.join(","));
 
                     const usage = new Array(types.length).fill(0);
 
-                    const better = (cand) => {
-                        if (cand.overI < best.overI) return true;
-                        if (cand.overI === best.overI) {
-                            if (cand.platesPerSide < best.platesPerSide)
-                                return true;
-                            if (cand.platesPerSide === best.platesPerSide) {
-                                if (cand.distinct < best.distinct) return true;
-                                if (cand.distinct === best.distinct) {
-                                    // Prefer heavier plates when otherwise identical (types are sorted desc)
-                                    for (
-                                        let i = 0;
-                                        i < cand.usageCounts.length;
-                                        i++
-                                    ) {
-                                        if (
-                                            cand.usageCounts[i] !==
-                                            best.usageCounts[i]
-                                        )
-                                            return (
-                                                cand.usageCounts[i] >
-                                                best.usageCounts[i]
-                                            );
-                                    }
-                                }
-                            }
-                        }
-                        return false;
-                    };
-
                     function dfs(i, sumI, platesPerSide, distinct) {
                         if (sumI >= needPerSideI) {
-                            const cand = {
-                                sumI,
-                                overI: sumI - needPerSideI,
-                                platesPerSide,
-                                distinct,
-                                usageCounts: usage.slice(),
-                            };
-                            if (better(cand)) best = cand;
+                            const overI = sumI - needPerSideI;
+                            // Strictly better: less overshoot, or same overshoot + fewer plates
+                            if (overI < bestOverI || (overI === bestOverI && platesPerSide < bestPlatesPerSide)) {
+                                bestOverI = overI;
+                                bestPlatesPerSide = platesPerSide;
+                                bestSolutions = [usage.slice()];
+                                seenSolutions.clear();
+                                seenSolutions.add(usage.join(","));
+                            } else if (overI === bestOverI && platesPerSide === bestPlatesPerSide) {
+                                // Equally optimal: add if not duplicate
+                                const key = usage.join(",");
+                                if (!seenSolutions.has(key)) {
+                                    seenSolutions.add(key);
+                                    bestSolutions.push(usage.slice());
+                                }
+                            }
                             return;
                         }
                         if (i >= types.length) return;
@@ -705,7 +682,7 @@
                         const t = types[i];
 
                         // Branch cap using current best.
-                        const capSumI = needPerSideI + best.overI;
+                        const capSumI = needPerSideI + bestOverI;
                         const byBest = Math.ceil((capSumI - sumI) / t.wI);
                         const maxUse = Math.max(
                             0,
@@ -721,16 +698,10 @@
 
                             if (newSumI >= needPerSideI) {
                                 const overI = newSumI - needPerSideI;
-                                if (overI > best.overI) continue;
+                                if (overI > bestOverI) continue;
                                 if (
-                                    overI === best.overI &&
-                                    newPlates > best.platesPerSide
-                                )
-                                    continue;
-                                if (
-                                    overI === best.overI &&
-                                    newPlates === best.platesPerSide &&
-                                    newDistinct > best.distinct
+                                    overI === bestOverI &&
+                                    newPlates > bestPlatesPerSide
                                 )
                                     continue;
                             }
@@ -742,17 +713,23 @@
 
                     dfs(0, 0, 0, 0);
 
-                    const usagePerSide = [];
-                    for (let i = 0; i < types.length; i++) {
-                        const c = best.usageCounts[i];
-                        if (c > 0)
-                            usagePerSide.push({
-                                weight: types[i].w,
-                                perSideCount: c,
-                            });
-                    }
+                    // Convert all solutions to usagePerSide format
+                    const allUsagePerSide = bestSolutions.map(usageCounts => {
+                        const usagePerSide = [];
+                        for (let i = 0; i < types.length; i++) {
+                            const c = usageCounts[i];
+                            if (c > 0)
+                                usagePerSide.push({
+                                    weight: types[i].w,
+                                    perSideCount: c,
+                                });
+                        }
+                        return usagePerSide;
+                    });
 
-                    const achievedTotalI = barI + 2 * best.sumI;
+                    // Compute achieved total from bestOverI (all solutions share same sumI)
+                    const bestSumI = needPerSideI + bestOverI;
+                    const achievedTotalI = barI + 2 * bestSumI;
                     const achievedTotal = fromInt(achievedTotalI);
                     const overBy = achievedTotal - targetTotal;
 
@@ -766,7 +743,7 @@
                         targetTotal,
                         achievedTotal,
                         overBy,
-                        usagePerSide,
+                        allUsagePerSide,
                         noteOddPairsIgnored: hasOdd,
                     };
                 }
@@ -787,20 +764,22 @@
                         return;
                     }
 
-                    const perSide = [];
-                    for (const u of r.usagePerSide)
-                        for (let i = 0; i < u.perSideCount; i++)
-                            perSide.push(fmt(u.weight));
-                    const platesStr = perSide.length
-                        ? perSide.join(" + ")
-                        : "(no plates)";
+                    // Handle both old single usagePerSide (below-bar) and new allUsagePerSide
+                    const allUsage = r.allUsagePerSide || [r.usagePerSide];
 
-                    const totals = r.usagePerSide.map(
-                        (u) => `${fmt(u.weight)}×${u.perSideCount * 2}`,
+                    // Build "Per side:" lines for each combination
+                    const perSideLines = allUsage.map(usagePerSide => {
+                        const perSide = [];
+                        for (const u of usagePerSide)
+                            for (let i = 0; i < u.perSideCount; i++)
+                                perSide.push(fmt(u.weight));
+                        return perSide.length ? perSide.join(" + ") : "(no plates)";
+                    });
+
+                    // Total plate count (same for all combinations)
+                    const totalPlateCount = allUsage[0].reduce(
+                        (sum, u) => sum + u.perSideCount * 2, 0
                     );
-                    const totalsStr = totals.length
-                        ? totals.join(", ")
-                        : "(no plates)";
 
                     const exact = Math.abs(r.overBy) <= 1e-9;
 
@@ -812,11 +791,15 @@
                         ? `<div class="muted">Note: only pairs are usable; any odd single plate is ignored.</div>`
                         : "";
 
+                    const perSideHtml = perSideLines.map(line =>
+                        `<div class="mono">Per side: ${line}</div>`
+                    ).join("\n              ");
+
                     el.results.innerHTML = `
             <div class="result-wrap">
               <div class="result-main mono"><strong>= ${fmt(r.achievedTotal)}</strong></div>
-              <div class="mono">Per side: ${platesStr}</div>
-              <div class="mono muted">Total plates: ${totalsStr}</div>
+              ${perSideHtml}
+              <div class="mono muted">Total plates: ${totalPlateCount}</div>
               ${noteBelowBar}
               ${notePairs}
               ${
