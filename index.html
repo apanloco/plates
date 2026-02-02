@@ -145,9 +145,11 @@
                 transition: none;
             }
 
-            button:hover {
-                background: var(--accent);
-                color: var(--bg);
+            @media (hover: hover) {
+                button:hover {
+                    background: var(--accent);
+                    color: var(--bg);
+                }
             }
 
             button:active {
@@ -246,8 +248,10 @@
                 background: var(--bg);
             }
 
-            .btn-reset:hover {
-                background: var(--danger);
+            @media (hover: hover) {
+                .btn-reset:hover {
+                    background: var(--danger);
+                }
             }
 
             /* Scrollbar styling for that retro feel */
@@ -758,6 +762,7 @@
                 }
 
                 function renderInventory() {
+                    el.inventory.style.pointerEvents = "none";
                     el.inventory.textContent = "";
                     const frag = document.createDocumentFragment();
 
@@ -801,6 +806,9 @@
                     }
 
                     el.inventory.append(frag);
+                    requestAnimationFrame(() => {
+                        el.inventory.style.pointerEvents = "";
+                    });
                 }
 
                 function recalcAndRender() {
