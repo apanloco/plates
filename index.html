@@ -7,50 +7,58 @@
         <title>Plates</title>
 
         <style>
+            @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
             * {
                 box-sizing: border-box;
+                image-rendering: pixelated;
             }
 
             :root {
-                --bg: #fff;
-                --bg-alt: #f5f5f5;
-                --fg: #222;
-                --fg-muted: #666;
-                --border: #ddd;
-                --danger: #c00;
+                --bg: #e8e4d9;
+                --bg-alt: #d4cfc2;
+                --fg: #2a2a2a;
+                --fg-muted: #5a5a5a;
+                --border: #2a2a2a;
+                --accent: #4a7c59;
+                --danger: #a63d40;
+                --shadow: #1a1a1a;
             }
 
             @media (prefers-color-scheme: dark) {
                 :root {
-                    --bg: #1a1a1a;
-                    --bg-alt: #252525;
-                    --fg: #e5e5e5;
-                    --fg-muted: #999;
-                    --border: #444;
-                    --danger: #f66;
+                    --bg: #1a1a2e;
+                    --bg-alt: #16213e;
+                    --fg: #e8e4d9;
+                    --fg-muted: #8a8a9a;
+                    --border: #e8e4d9;
+                    --accent: #7ec8a3;
+                    --danger: #e76f6f;
+                    --shadow: #0a0a15;
                 }
             }
 
             html {
-                font-family: system-ui, -apple-system, BlinkMacSystemFont,
-                    "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-                font-size: 15px;
-                line-height: 1.4;
+                font-family: 'VT323', monospace;
+                font-size: 18px;
+                line-height: 1.2;
                 background: var(--bg);
                 color: var(--fg);
             }
 
             body {
                 margin: 0;
-                padding: 0.75rem;
-                max-width: 480px;
+                padding: 12px;
+                max-width: 420px;
                 margin-inline: auto;
             }
 
             h1 {
-                font-size: 1.1rem;
-                margin: 0 0 0.5rem 0;
-                font-weight: 600;
+                font-size: 1.4rem;
+                margin: 0 0 8px 0;
+                font-weight: normal;
+                letter-spacing: 2px;
+                text-transform: uppercase;
             }
 
             .muted {
@@ -58,8 +66,7 @@
             }
 
             .mono {
-                font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo,
-                    Consolas, monospace;
+                font-family: 'VT323', monospace;
                 font-variant-numeric: tabular-nums;
             }
 
@@ -67,154 +74,198 @@
                 color: var(--danger);
             }
 
+            /* Pixel border mixin */
+            .pixel-box {
+                border: 2px solid var(--border);
+                box-shadow:
+                    4px 4px 0 var(--shadow),
+                    inset -1px -1px 0 var(--fg-muted),
+                    inset 1px 1px 0 var(--bg);
+            }
+
             /* Inputs row */
             .inputs-row {
                 display: flex;
-                gap: 0.5rem;
-                margin-bottom: 0.75rem;
+                gap: 8px;
+                margin-bottom: 10px;
             }
 
             .input-group {
                 flex: 1;
                 display: flex;
                 align-items: center;
-                gap: 0.25rem;
+                gap: 4px;
             }
 
             .input-group label {
-                font-size: 0.8rem;
+                font-size: 0.9rem;
                 color: var(--fg-muted);
-                min-width: 2.5rem;
+                min-width: 42px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
             }
 
             .input-wrap {
                 flex: 1;
                 display: flex;
-                gap: 0.25rem;
+                gap: 4px;
             }
 
             input[type="text"],
             input[type="number"] {
-                font-family: inherit;
-                font-size: 0.95rem;
-                padding: 0.4rem 0.5rem;
-                border: 1px solid var(--border);
-                border-radius: 4px;
+                font-family: 'VT323', monospace;
+                font-size: 1.1rem;
+                padding: 4px 6px;
+                border: 2px solid var(--border);
+                border-radius: 0;
                 background: var(--bg);
                 color: var(--fg);
                 width: 100%;
+                box-shadow: inset 2px 2px 0 var(--shadow);
             }
 
             input:focus {
-                outline: 2px solid var(--fg-muted);
-                outline-offset: -1px;
+                outline: none;
+                background: var(--bg-alt);
+                box-shadow: inset 2px 2px 0 var(--shadow), 0 0 0 1px var(--accent);
             }
 
             button {
-                font-family: inherit;
-                font-size: 1rem;
-                padding: 0.4rem 0.6rem;
-                border: 1px solid var(--border);
-                border-radius: 4px;
+                font-family: 'VT323', monospace;
+                font-size: 1.1rem;
+                padding: 4px 8px;
+                border: 2px solid var(--border);
+                border-radius: 0;
                 background: var(--bg-alt);
                 color: var(--fg);
                 cursor: pointer;
                 line-height: 1;
+                box-shadow: 2px 2px 0 var(--shadow);
+                text-transform: uppercase;
+                transition: none;
             }
 
             button:hover {
-                background: var(--border);
+                background: var(--accent);
+                color: var(--bg);
             }
 
             button:active {
-                opacity: 0.8;
+                box-shadow: none;
+                transform: translate(2px, 2px);
             }
 
             .clear-btn {
-                padding: 0.4rem 0.5rem;
-                min-width: 2rem;
+                padding: 4px 6px;
+                min-width: 28px;
             }
 
             /* Results */
             .results {
-                margin-bottom: 0.75rem;
-                padding: 0.5rem;
+                margin-bottom: 10px;
+                padding: 8px;
                 background: var(--bg-alt);
-                border-radius: 4px;
-                font-size: 0.9rem;
+                border: 2px solid var(--border);
+                box-shadow: 4px 4px 0 var(--shadow);
             }
 
             .result-main {
-                font-size: 1.2rem;
-                font-weight: 600;
-                margin-bottom: 0.25rem;
+                font-size: 1.5rem;
+                margin-bottom: 4px;
+                color: var(--accent);
             }
 
             .result-line {
-                margin: 0.15rem 0;
+                margin: 2px 0;
+                font-size: 1rem;
             }
 
             /* Plate table */
             .plate-table {
-                border: 1px solid var(--border);
-                border-radius: 4px;
-                overflow: hidden;
-                font-size: 0.85rem;
+                border: 2px solid var(--border);
+                box-shadow: 4px 4px 0 var(--shadow);
+                font-size: 1rem;
             }
 
             .plate-head {
                 display: grid;
-                grid-template-columns: 1fr 1fr 2rem;
-                gap: 0.4rem;
-                padding: 0.35rem 0.5rem;
-                background: var(--bg-alt);
-                font-weight: 600;
-                border-bottom: 1px solid var(--border);
+                grid-template-columns: 1fr 1fr 32px;
+                gap: 6px;
+                padding: 6px 8px;
+                background: var(--border);
+                color: var(--bg);
+                text-transform: uppercase;
+                letter-spacing: 1px;
             }
 
             .plate-row {
                 display: grid;
-                grid-template-columns: 1fr 1fr 2rem;
-                gap: 0.4rem;
-                padding: 0.3rem 0.5rem;
+                grid-template-columns: 1fr 1fr 32px;
+                gap: 6px;
+                padding: 4px 8px;
                 align-items: center;
+                background: var(--bg);
             }
 
-            .plate-row + .plate-row {
-                border-top: 1px solid var(--border);
+            .plate-row:nth-child(even) {
+                background: var(--bg-alt);
             }
 
             .plate-row input {
-                padding: 0.25rem 0.4rem;
-                font-size: 0.85rem;
+                padding: 2px 4px;
+                font-size: 1rem;
             }
 
             .plate-row button {
-                padding: 0.2rem;
-                min-width: 1.75rem;
-                font-size: 0.9rem;
+                padding: 2px 4px;
+                min-width: 24px;
+                font-size: 1rem;
+                box-shadow: 1px 1px 0 var(--shadow);
+            }
+
+            .plate-row button:active {
+                transform: translate(1px, 1px);
+                box-shadow: none;
             }
 
             .plate-footer {
-                border-top: 1px solid var(--border);
+                border-top: 2px dashed var(--border);
+                background: var(--bg) !important;
             }
 
             /* Footer */
             .footer {
-                margin-top: 0.75rem;
+                margin-top: 10px;
                 display: flex;
                 justify-content: flex-end;
             }
 
             .btn-reset {
-                font-size: 0.8rem;
-                padding: 0.3rem 0.6rem;
+                font-size: 0.9rem;
+                padding: 4px 10px;
+                background: var(--bg);
+            }
+
+            .btn-reset:hover {
+                background: var(--danger);
+            }
+
+            /* Scrollbar styling for that retro feel */
+            ::-webkit-scrollbar {
+                width: 12px;
+            }
+            ::-webkit-scrollbar-track {
+                background: var(--bg-alt);
+                border: 2px solid var(--border);
+            }
+            ::-webkit-scrollbar-thumb {
+                background: var(--border);
             }
         </style>
     </head>
 
     <body>
-        <h1>Plates</h1>
+        <h1>&gt; Plates_</h1>
 
         <div class="inputs-row">
             <div class="input-group">
