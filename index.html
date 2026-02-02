@@ -86,7 +86,7 @@
             /* Inputs row */
             .inputs-row {
                 display: flex;
-                gap: 8px;
+                gap: 16px;
                 margin-bottom: 10px;
             }
 
@@ -98,9 +98,12 @@
             }
 
             .input-group label {
+                flex-shrink: 0;
+            }
+
+            .input-group label {
                 font-size: 0.9rem;
                 color: var(--fg-muted);
-                min-width: 42px;
                 text-transform: uppercase;
                 letter-spacing: 1px;
             }
