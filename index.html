@@ -6,395 +6,317 @@
         <meta name="color-scheme" content="light dark" />
         <title>Plates</title>
 
-        <link
-            rel="stylesheet"
-            href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1.1/css/pico.min.css"
-        />
-
         <style>
-            :root {
-                --app-max: 860px;
-                --plate-cols: 1fr 1.2fr 3.25rem;
-                --plate-cols-sm: 1fr 1fr 3.15rem;
+            * {
+                box-sizing: border-box;
             }
 
-            main.container {
-                max-width: var(--app-max);
-                padding-inline: 1rem;
+            :root {
+                --bg: #fff;
+                --bg-alt: #f5f5f5;
+                --fg: #222;
+                --fg-muted: #666;
+                --border: #ddd;
+                --danger: #c00;
             }
-            @media (max-width: 380px) {
-                main.container {
-                    padding-inline: 0.75rem;
+
+            @media (prefers-color-scheme: dark) {
+                :root {
+                    --bg: #1a1a1a;
+                    --bg-alt: #252525;
+                    --fg: #e5e5e5;
+                    --fg-muted: #999;
+                    --border: #444;
+                    --danger: #f66;
                 }
+            }
+
+            html {
+                font-family: system-ui, -apple-system, BlinkMacSystemFont,
+                    "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                font-size: 15px;
+                line-height: 1.4;
+                background: var(--bg);
+                color: var(--fg);
+            }
+
+            body {
+                margin: 0;
+                padding: 0.75rem;
+                max-width: 480px;
+                margin-inline: auto;
+            }
+
+            h1 {
+                font-size: 1.1rem;
+                margin: 0 0 0.5rem 0;
+                font-weight: 600;
             }
 
             .muted {
-                opacity: 0.75;
+                color: var(--fg-muted);
             }
+
             .mono {
+                font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+                    Consolas, monospace;
                 font-variant-numeric: tabular-nums;
             }
-            .spacer {
-                height: 0.6rem;
+
+            .danger {
+                color: var(--danger);
             }
 
-            .plate-table {
-                border: 1px solid var(--pico-muted-border-color);
-                border-radius: var(--pico-border-radius);
-                overflow: hidden;
-                background: var(--pico-card-background-color);
+            /* Inputs row */
+            .inputs-row {
+                display: flex;
+                gap: 0.5rem;
+                margin-bottom: 0.75rem;
             }
 
-            .plate-head,
-            .plate-row {
-                display: grid;
-                grid-template-columns: var(--plate-cols);
-                gap: 0.6rem;
+            .input-group {
+                flex: 1;
+                display: flex;
                 align-items: center;
-                padding: 0.6rem 0.75rem;
+                gap: 0.25rem;
+            }
+
+            .input-group label {
+                font-size: 0.8rem;
+                color: var(--fg-muted);
+                min-width: 2.5rem;
+            }
+
+            .input-wrap {
+                flex: 1;
+                display: flex;
+                gap: 0.25rem;
+            }
+
+            input[type="text"],
+            input[type="number"] {
+                font-family: inherit;
+                font-size: 0.95rem;
+                padding: 0.4rem 0.5rem;
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                background: var(--bg);
+                color: var(--fg);
+                width: 100%;
+            }
+
+            input:focus {
+                outline: 2px solid var(--fg-muted);
+                outline-offset: -1px;
+            }
+
+            button {
+                font-family: inherit;
+                font-size: 1rem;
+                padding: 0.4rem 0.6rem;
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                background: var(--bg-alt);
+                color: var(--fg);
+                cursor: pointer;
+                line-height: 1;
+            }
+
+            button:hover {
+                background: var(--border);
+            }
+
+            button:active {
+                opacity: 0.8;
+            }
+
+            .clear-btn {
+                padding: 0.4rem 0.5rem;
+                min-width: 2rem;
+            }
+
+            /* Results */
+            .results {
+                margin-bottom: 0.75rem;
+                padding: 0.5rem;
+                background: var(--bg-alt);
+                border-radius: 4px;
+                font-size: 0.9rem;
+            }
+
+            .result-main {
+                font-size: 1.2rem;
+                font-weight: 600;
+                margin-bottom: 0.25rem;
+            }
+
+            .result-line {
+                margin: 0.15rem 0;
+            }
+
+            /* Plate table */
+            .plate-table {
+                border: 1px solid var(--border);
+                border-radius: 4px;
+                overflow: hidden;
+                font-size: 0.85rem;
             }
 
             .plate-head {
-                background: color-mix(
-                    in srgb,
-                    var(--pico-card-background-color) 75%,
-                    var(--pico-muted-color) 25%
-                );
+                display: grid;
+                grid-template-columns: 1fr 1fr 2rem;
+                gap: 0.4rem;
+                padding: 0.35rem 0.5rem;
+                background: var(--bg-alt);
                 font-weight: 600;
-                border-bottom: 1px solid var(--pico-muted-border-color);
+                border-bottom: 1px solid var(--border);
+            }
+
+            .plate-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr 2rem;
+                gap: 0.4rem;
+                padding: 0.3rem 0.5rem;
+                align-items: center;
             }
 
             .plate-row + .plate-row {
-                border-top: 1px solid var(--pico-muted-border-color);
+                border-top: 1px solid var(--border);
             }
 
-            .plate-row input[type="number"],
+            .plate-row input {
+                padding: 0.25rem 0.4rem;
+                font-size: 0.85rem;
+            }
+
             .plate-row button {
-                margin: 0;
+                padding: 0.2rem;
+                min-width: 1.75rem;
+                font-size: 0.9rem;
             }
 
-            .plate-row > :nth-child(2),
-            .plate-row > :nth-child(3) {
+            .plate-footer {
+                border-top: 1px solid var(--border);
+            }
+
+            /* Footer */
+            .footer {
+                margin-top: 0.75rem;
                 display: flex;
-                align-items: center;
-            }
-
-            /* Match Pico's group alignment: input stretches, action button hugs right edge */
-            .plate-row > :nth-child(2) {
-                width: 100%;
-            }
-            .plate-row > :nth-child(2) input {
-                flex: 1;
-                width: 100%;
-            }
-            .plate-row > :nth-child(3) {
                 justify-content: flex-end;
             }
 
-            /* Force the action button (3rd column) to hug the right edge consistently */
-            .plate-row > :nth-child(3) button,
-            .plate-footer > :nth-child(3) button {
-                margin-left: auto;
-            }
-
-            .icon-btn {
-                height: var(--pico-form-element-height, 3rem);
-                width: var(--pico-form-element-height, 3rem);
-                padding: 0;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                line-height: 1;
-            }
-
-            /* Subtle background tints (not text) for add/remove */
-            .btn-add {
-                background: color-mix(
-                    in srgb,
-                    var(--pico-ins-color) 28%,
-                    var(--pico-card-background-color) 72%
-                );
-                border-color: color-mix(
-                    in srgb,
-                    var(--pico-ins-color) 70%,
-                    var(--pico-muted-border-color) 30%
-                );
-            }
-            .btn-add:hover,
-            .btn-add:focus,
-            .clear-btn:hover,
-            .clear-btn:focus {
-                background: color-mix(
-                    in srgb,
-                    var(--pico-ins-color) 40%,
-                    var(--pico-card-background-color) 60%
-                );
-                border-color: var(--pico-ins-color);
-            }
-
-            .btn-remove {
-                background: color-mix(
-                    in srgb,
-                    var(--pico-del-color) 28%,
-                    var(--pico-card-background-color) 72%
-                );
-                border-color: color-mix(
-                    in srgb,
-                    var(--pico-del-color) 70%,
-                    var(--pico-muted-border-color) 30%
-                );
-            }
-            .btn-remove:hover,
-            .btn-remove:focus {
-                background: color-mix(
-                    in srgb,
-                    var(--pico-del-color) 40%,
-                    var(--pico-card-background-color) 60%
-                );
-                border-color: var(--pico-del-color);
-            }
-
-            /* Keep glyph color consistent with Pico's secondary buttons */
-            .btn-add,
-            .btn-remove {
-                color: var(--pico-color);
-            }
-
-            /* In light mode, use darker glyphs on tinted buttons for better contrast */
-            :root:not([data-theme="dark"]) .btn-add,
-            :root:not([data-theme="dark"]) .btn-remove,
-            :root:not([data-theme="dark"]) .btn-danger {
-                color: var(--pico-h1-color);
-            }
-
-            /* Clear (×) buttons: match the rounded "action button" feel */
-            .clear-btn {
-                width: var(--pico-form-element-height, 3rem);
-                min-width: var(--pico-form-element-height, 3rem);
-                padding: 0;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                line-height: 1;
-                border-radius: var(--pico-border-radius);
-
-                /* Match the "add row" button styling (green-tinted) */
-                background: color-mix(
-                    in srgb,
-                    var(--pico-ins-color) 18%,
-                    var(--pico-card-background-color) 82%
-                );
-                border-color: var(--pico-ins-color);
-                color: var(--pico-color);
-            }
-
-            /* In light mode, use darker glyphs on tinted buttons for better contrast */
-            :root:not([data-theme="dark"]) .clear-btn {
-                color: var(--pico-h1-color);
-            }
-
-            /* Make the "add plate" row look/behave like a regular `.plate-row` */
-            .plate-footer {
-                border-top: 1px solid var(--pico-muted-border-color);
-                background: var(--pico-card-background-color);
-            }
-
-            /* Ensure all form controls in the add row match row spacing */
-            .plate-footer input,
-            .plate-footer button {
-                margin: 0;
-            }
-
-            .result-wrap {
-                display: grid;
-                gap: 0.35rem;
-            }
-            .result-main {
-                font-size: 1.35rem;
-            }
-            .danger {
-                color: var(--pico-del-color);
-            }
-
-            /* Background-tinted destructive button (used for Reset) */
-            .btn-danger {
-                background: color-mix(
-                    in srgb,
-                    var(--pico-del-color) 28%,
-                    var(--pico-card-background-color) 72%
-                );
-                border-color: color-mix(
-                    in srgb,
-                    var(--pico-del-color) 70%,
-                    var(--pico-muted-border-color) 30%
-                );
-                color: var(--pico-color);
-            }
-            .btn-danger:hover,
-            .btn-danger:focus {
-                background: color-mix(
-                    in srgb,
-                    var(--pico-del-color) 40%,
-                    var(--pico-card-background-color) 60%
-                );
-                border-color: var(--pico-del-color);
-            }
-
-            @media (max-width: 520px) {
-                .plate-head,
-                .plate-row,
-                .plate-footer {
-                    padding: 0.55rem 0.6rem;
-                    gap: 0.5rem;
-                    grid-template-columns: var(--plate-cols-sm);
-                }
+            .btn-reset {
+                font-size: 0.8rem;
+                padding: 0.3rem 0.6rem;
             }
         </style>
     </head>
 
     <body>
-        <main class="container">
-            <header>
-                <h1>Plates</h1>
-                <p class="muted">
-                    Finds the smallest total weight that is ≥ your target.
-                    Unit-agnostic (pick one unit system and stick to it).
-                </p>
-            </header>
+        <h1>Plates</h1>
 
-            <article>
-                <h2>Inputs</h2>
-
-                <div>
-                    <label for="targetWeight">Total</label>
-                    <div role="group">
-                        <input
-                            id="targetWeight"
-                            class="mono"
-                            type="text"
-                            inputmode="decimal"
-                            step="0.5"
-                            min="0"
-                            placeholder="e.g. 112"
-                        />
-                        <button
-                            id="clearTarget"
-                            type="button"
-                            class="clear-btn"
-                            aria-label="Clear total"
-                            title="Clear"
-                        >
-                            ×
-                        </button>
-                    </div>
-                </div>
-
-                <div class="spacer"></div>
-
-                <div>
-                    <label for="barWeight">Bar</label>
-                    <div role="group">
-                        <input
-                            id="barWeight"
-                            class="mono"
-                            type="text"
-                            inputmode="decimal"
-                            step="0.5"
-                            min="0"
-                            placeholder="e.g. 25"
-                        />
-                        <button
-                            id="clearBar"
-                            type="button"
-                            class="clear-btn"
-                            aria-label="Clear bar"
-                            title="Clear"
-                        >
-                            ×
-                        </button>
-                    </div>
-                </div>
-            </article>
-
-            <article>
-                <h2 style="margin-bottom: 0.35rem">Result</h2>
-                <div id="results" aria-live="polite" aria-atomic="true"></div>
-            </article>
-
-            <article>
-                <h2>Plates</h2>
-
-                <div class="plate-table">
-                    <div class="plate-head">
-                        <div>Weight</div>
-                        <div>Available</div>
-                        <div></div>
-                    </div>
-
-                    <div id="inventory"></div>
-
-                    <div class="plate-row plate-footer" aria-label="Add plate">
-                        <div>
-                            <input
-                                id="newWeight"
-                                class="mono"
-                                type="text"
-                                inputmode="decimal"
-                                step="0.01"
-                                placeholder="Weight"
-                                aria-label="New plate weight"
-                            />
-                        </div>
-                        <div>
-                            <input
-                                id="newAvailable"
-                                class="mono"
-                                type="number"
-                                inputmode="numeric"
-                                step="1"
-                                min="0"
-                                placeholder="Available"
-                                aria-label="New plate available"
-                            />
-                        </div>
-                        <div>
-                            <button
-                                id="addPlate"
-                                type="button"
-                                class="secondary icon-btn btn-add"
-                                aria-label="Add plate"
-                                title="Add"
-                            >
-                                +
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </article>
-
-            <footer class="muted">
-                <div
-                    style="
-                        display: flex;
-                        justify-content: flex-end;
-                        padding-top: 0.75rem;
-                    "
-                >
-                    <button id="resetApp" type="button" class="btn-danger">
-                        Reset
+        <div class="inputs-row">
+            <div class="input-group">
+                <label for="targetWeight">Total</label>
+                <div class="input-wrap">
+                    <input
+                        id="targetWeight"
+                        class="mono"
+                        type="text"
+                        inputmode="decimal"
+                        placeholder="112"
+                    />
+                    <button
+                        id="clearTarget"
+                        type="button"
+                        class="clear-btn"
+                        aria-label="Clear total"
+                    >
+                        &times;
                     </button>
                 </div>
-            </footer>
-        </main>
+            </div>
+
+            <div class="input-group">
+                <label for="barWeight">Bar</label>
+                <div class="input-wrap">
+                    <input
+                        id="barWeight"
+                        class="mono"
+                        type="text"
+                        inputmode="decimal"
+                        placeholder="25"
+                    />
+                    <button
+                        id="clearBar"
+                        type="button"
+                        class="clear-btn"
+                        aria-label="Clear bar"
+                    >
+                        &times;
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="results" class="results" aria-live="polite">
+            <span class="muted">&mdash;</span>
+        </div>
+
+        <div class="plate-table">
+            <div class="plate-head">
+                <div>Weight</div>
+                <div>Available</div>
+                <div></div>
+            </div>
+
+            <div id="inventory"></div>
+
+            <div class="plate-row plate-footer">
+                <div>
+                    <input
+                        id="newWeight"
+                        class="mono"
+                        type="text"
+                        inputmode="decimal"
+                        placeholder="Weight"
+                        aria-label="New plate weight"
+                    />
+                </div>
+                <div>
+                    <input
+                        id="newAvailable"
+                        class="mono"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        placeholder="Qty"
+                        aria-label="New plate quantity"
+                    />
+                </div>
+                <div>
+                    <button
+                        id="addPlate"
+                        type="button"
+                        aria-label="Add plate"
+                    >
+                        +
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <button id="resetApp" type="button" class="btn-reset">Reset</button>
+        </div>
 
         <script>
             (() => {
                 "use strict";
 
-                // ---- config ----
-                const STORAGE_KEY = "weightsAppSettings.v7";
+                const STORAGE_KEY = "platesAppSettings.v7";
 
-                // tuple format: [weight, availableTotal]
                 const DEFAULT_INVENTORY = [
                     [25, 4],
                     [20, 4],
@@ -409,40 +331,32 @@
                 const DEFAULT_BAR = 25;
                 const DEFAULT_TARGET = 112;
 
-                // ---- dom ----
                 const $ = (id) => document.getElementById(id);
                 const el = {
                     target: $("targetWeight"),
                     bar: $("barWeight"),
                     clearTarget: $("clearTarget"),
                     clearBar: $("clearBar"),
-
                     inventory: $("inventory"),
                     results: $("results"),
-
                     newWeight: $("newWeight"),
                     newAvailable: $("newAvailable"),
                     addPlate: $("addPlate"),
-
                     reset: $("resetApp"),
                 };
 
-                // ---- state ----
                 let state = {
                     targetWeight: String(DEFAULT_TARGET),
                     barWeight: DEFAULT_BAR,
-                    plates: [], // {id, weight:number, available:int}
+                    plates: [],
                 };
 
-                // ---- utils ----
                 const uid = () =>
                     "p_" +
                     Math.random().toString(16).slice(2) +
                     "_" +
                     Date.now().toString(16);
 
-                // Accept comma as decimal separator (notably iOS numpad in some locales).
-                // We only normalize the decimal separator; we do not attempt to handle thousands separators.
                 const normalizeNumberString = (v) => {
                     if (v == null) return "";
                     let s = String(v).trim();
@@ -459,7 +373,6 @@
                     return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0;
                 };
 
-                // Internally compute in "centi-units" (2 decimals) to avoid float edge cases.
                 const SCALE = 100;
                 const toInt = (v) => {
                     const n = parseLocaleNumber(v);
@@ -488,7 +401,7 @@
                             (p) =>
                                 Number.isFinite(p.weight) &&
                                 p.weight > 0 &&
-                                clampInt(p.available) >= 0,
+                                clampInt(p.available) >= 0
                         )
                         .map((p) => ({
                             id: p.id || uid(),
@@ -498,7 +411,6 @@
                         .sort(byWeightDesc);
                 }
 
-                // ---- persistence ----
                 function save() {
                     const payload = {
                         targetWeight: state.targetWeight,
@@ -555,10 +467,8 @@
                               ? state.barWeight
                               : "";
                     el.newWeight.value = "";
-                    el.newAvailable.value = "0";
+                    el.newAvailable.value = "";
                 }
-
-                // ---- solver ----
 
                 function computeBest(targetTotal, barWeight, plates) {
                     if (
@@ -567,11 +477,9 @@
                     )
                         return { kind: "invalid" };
 
-                    // Treat negative inputs as invalid (nonsensical weights).
                     if (targetTotal < 0 || barWeight < 0)
                         return { kind: "invalid" };
 
-                    // Convert to integer "centi-units" for exact comparisons.
                     const targetI = toInt(targetTotal);
                     const barI = toInt(barWeight);
                     if (!Number.isFinite(targetI) || !Number.isFinite(barI))
@@ -579,7 +487,6 @@
 
                     const needTotalI = Math.max(0, targetI - barI);
 
-                    // If target is below bar, the minimum achievable is the bar alone.
                     if (needTotalI <= 0) {
                         return {
                             kind: "below-bar",
@@ -590,11 +497,6 @@
                         };
                     }
 
-                    // Must be symmetric: per-side requirement must be integer.
-                    if (needTotalI % 2 !== 0) {
-                        // We can still solve by finding the smallest >= target.
-                        // Equivalent to rounding the per-side requirement up to the next integer.
-                    }
                     const needPerSideI = Math.ceil(needTotalI / 2);
 
                     const types = plates
@@ -608,7 +510,7 @@
                             (t) =>
                                 Number.isFinite(t.wI) &&
                                 t.wI > 0 &&
-                                t.maxPerSide > 0,
+                                t.maxPerSide > 0
                         )
                         .sort((a, b) => b.wI - a.wI);
 
@@ -616,7 +518,6 @@
                     for (const t of types) maxSumI += t.wI * t.maxPerSide;
                     if (maxSumI < needPerSideI) return { kind: "no-solution" };
 
-                    // Greedy upper bound in integer space
                     const greedy = (() => {
                         let sumI = 0;
                         let platesCount = 0;
@@ -629,7 +530,7 @@
                             const remainingI = Math.max(0, needPerSideI - sumI);
                             const take = Math.min(
                                 t.maxPerSide,
-                                Math.ceil(remainingI / t.wI),
+                                Math.ceil(remainingI / t.wI)
                             );
                             if (take > 0) {
                                 usageCounts[i] = take;
@@ -660,15 +561,20 @@
                     function dfs(i, sumI, platesPerSide, distinct) {
                         if (sumI >= needPerSideI) {
                             const overI = sumI - needPerSideI;
-                            // Strictly better: less overshoot, or same overshoot + fewer plates
-                            if (overI < bestOverI || (overI === bestOverI && platesPerSide < bestPlatesPerSide)) {
+                            if (
+                                overI < bestOverI ||
+                                (overI === bestOverI &&
+                                    platesPerSide < bestPlatesPerSide)
+                            ) {
                                 bestOverI = overI;
                                 bestPlatesPerSide = platesPerSide;
                                 bestSolutions = [usage.slice()];
                                 seenSolutions.clear();
                                 seenSolutions.add(usage.join(","));
-                            } else if (overI === bestOverI && platesPerSide === bestPlatesPerSide) {
-                                // Equally optimal: add if not duplicate
+                            } else if (
+                                overI === bestOverI &&
+                                platesPerSide === bestPlatesPerSide
+                            ) {
                                 const key = usage.join(",");
                                 if (!seenSolutions.has(key)) {
                                     seenSolutions.add(key);
@@ -681,12 +587,11 @@
 
                         const t = types[i];
 
-                        // Branch cap using current best.
                         const capSumI = needPerSideI + bestOverI;
                         const byBest = Math.ceil((capSumI - sumI) / t.wI);
                         const maxUse = Math.max(
                             0,
-                            Math.min(t.maxPerSide, byBest),
+                            Math.min(t.maxPerSide, byBest)
                         );
 
                         for (let c = maxUse; c >= 0; c--) {
@@ -713,8 +618,7 @@
 
                     dfs(0, 0, 0, 0);
 
-                    // Convert all solutions to usagePerSide format
-                    const allUsagePerSide = bestSolutions.map(usageCounts => {
+                    const allUsagePerSide = bestSolutions.map((usageCounts) => {
                         const usagePerSide = [];
                         for (let i = 0; i < types.length; i++) {
                             const c = usageCounts[i];
@@ -727,15 +631,13 @@
                         return usagePerSide;
                     });
 
-                    // Compute achieved total from bestOverI (all solutions share same sumI)
                     const bestSumI = needPerSideI + bestOverI;
                     const achievedTotalI = barI + 2 * bestSumI;
                     const achievedTotal = fromInt(achievedTotalI);
                     const overBy = achievedTotal - targetTotal;
 
-                    // Informational: any odd plate availability means something gets ignored.
                     const hasOdd = plates.some(
-                        (p) => clampInt(p.available) % 2 === 1,
+                        (p) => clampInt(p.available) % 2 === 1
                     );
 
                     return {
@@ -748,27 +650,23 @@
                     };
                 }
 
-                // ---- render ----
                 function renderResults(r) {
                     if (
                         el.target.value === "" ||
                         el.bar.value === "" ||
                         r.kind === "invalid"
                     ) {
-                        el.results.innerHTML = '<p class="muted">—</p>';
+                        el.results.innerHTML = '<span class="muted">&mdash;</span>';
                         return;
                     }
                     if (r.kind === "no-solution") {
-                        el.results.innerHTML =
-                            "<p><strong>No solution</strong></p>";
+                        el.results.innerHTML = "<strong>No solution</strong>";
                         return;
                     }
 
-                    // Handle both old single usagePerSide (below-bar) and new allUsagePerSide
                     const allUsage = r.allUsagePerSide || [r.usagePerSide];
 
-                    // Build "Per side:" lines for each combination
-                    const perSideLines = allUsage.map(usagePerSide => {
+                    const perSideLines = allUsage.map((usagePerSide) => {
                         const perSide = [];
                         for (const u of usagePerSide)
                             for (let i = 0; i < u.perSideCount; i++)
@@ -776,39 +674,36 @@
                         return perSide.length ? perSide.join(" + ") : "(no plates)";
                     });
 
-                    // Total plate count (same for all combinations)
                     const totalPlateCount = allUsage[0].reduce(
-                        (sum, u) => sum + u.perSideCount * 2, 0
+                        (sum, u) => sum + u.perSideCount * 2,
+                        0
                     );
 
                     const exact = Math.abs(r.overBy) <= 1e-9;
 
                     const noteBelowBar =
                         r.kind === "below-bar"
-                            ? `<div class="muted">Target is below bar weight; minimum achievable is the bar alone.</div>`
+                            ? `<div class="muted" style="font-size:0.8rem">Target below bar; minimum is bar alone.</div>`
                             : "";
                     const notePairs = r.noteOddPairsIgnored
-                        ? `<div class="muted">Note: only pairs are usable; any odd single plate is ignored.</div>`
+                        ? `<div class="muted" style="font-size:0.8rem">Only pairs usable; odd plates ignored.</div>`
                         : "";
 
-                    const perSideHtml = perSideLines.map(line =>
-                        `<div class="mono">Per side: ${line}</div>`
-                    ).join("\n              ");
+                    const perSideHtml = perSideLines
+                        .map(
+                            (line) =>
+                                `<div class="result-line mono">Per side: ${line}</div>`
+                        )
+                        .join("");
 
                     el.results.innerHTML = `
-            <div class="result-wrap">
-              <div class="result-main mono"><strong>= ${fmt(r.achievedTotal)}</strong></div>
-              ${perSideHtml}
-              <div class="mono muted">Total plates: ${totalPlateCount}</div>
-              ${noteBelowBar}
-              ${notePairs}
-              ${
-                  exact
-                      ? ""
-                      : `<div class="danger">Over by: <span class="mono">${fmt(r.overBy)}</span></div>`
-              }
-            </div>
-          `;
+                        <div class="result-main mono">= ${fmt(r.achievedTotal)}</div>
+                        ${perSideHtml}
+                        <div class="result-line muted">Total: ${totalPlateCount} plates</div>
+                        ${noteBelowBar}
+                        ${notePairs}
+                        ${exact ? "" : `<div class="result-line danger">Over by: <span class="mono">${fmt(r.overBy)}</span></div>`}
+                    `;
                 }
 
                 function renderInventory() {
@@ -821,10 +716,8 @@
                         row.dataset.id = p.id;
 
                         const w = document.createElement("div");
-                        const strong = document.createElement("strong");
-                        strong.className = "mono";
-                        strong.textContent = fmt(p.weight);
-                        w.append(strong);
+                        w.className = "mono";
+                        w.innerHTML = `<strong>${fmt(p.weight)}</strong>`;
 
                         const a = document.createElement("div");
                         const input = document.createElement("input");
@@ -834,21 +727,20 @@
                         input.min = "0";
                         input.className = "mono";
                         input.value = String(p.available);
-                        input.setAttribute("data-action", "setAvailable");
+                        input.dataset.action = "setAvailable";
                         input.setAttribute(
                             "aria-label",
-                            `Available for ${fmt(p.weight)}`,
+                            `Available for ${fmt(p.weight)}`
                         );
                         a.append(input);
 
                         const x = document.createElement("div");
                         const btn = document.createElement("button");
                         btn.type = "button";
-                        btn.className = "secondary icon-btn btn-remove";
-                        btn.setAttribute("data-action", "removePlate");
+                        btn.dataset.action = "removePlate";
                         btn.setAttribute(
                             "aria-label",
-                            `Remove ${fmt(p.weight)} plate`,
+                            `Remove ${fmt(p.weight)} plate`
                         );
                         btn.textContent = "×";
                         x.append(btn);
@@ -860,7 +752,6 @@
                     el.inventory.append(frag);
                 }
 
-                // ---- actions ----
                 function recalcAndRender() {
                     const targetStr = el.target.value;
                     const barStr = el.bar.value;
@@ -897,7 +788,7 @@
                     const a = clampInt(available === "" ? 0 : available);
 
                     const existing = state.plates.find(
-                        (p) => toInt(p.weight) === toInt(w),
+                        (p) => toInt(p.weight) === toInt(w)
                     );
                     if (existing) {
                         existing.available = a;
@@ -915,7 +806,7 @@
                 function submitNewPlate() {
                     const ok = addOrMergePlate(
                         el.newWeight.value,
-                        el.newAvailable.value,
+                        el.newAvailable.value
                     );
                     if (!ok) {
                         el.newWeight.focus();
@@ -927,7 +818,6 @@
                     scheduleRecalc();
                 }
 
-                // ---- events ----
                 function wire() {
                     el.target.addEventListener("input", () => {
                         state.targetWeight = el.target.value;
@@ -972,18 +862,16 @@
                         if (!row) return;
 
                         const p = state.plates.find(
-                            (x) => x.id === row.dataset.id,
+                            (x) => x.id === row.dataset.id
                         );
                         if (!p) return;
 
                         if (e.target.dataset.action === "setAvailable") {
-                            // Update state while typing, but don't force rounding yet.
                             p.available = clampInt(e.target.value);
                             scheduleRecalc();
                         }
                     });
 
-                    // Round to usable pairs only when the user leaves the field.
                     el.inventory.addEventListener("focusout", (e) => {
                         if (e.target?.dataset?.action !== "setAvailable")
                             return;
@@ -992,7 +880,7 @@
                         if (!row) return;
 
                         const p = state.plates.find(
-                            (x) => x.id === row.dataset.id,
+                            (x) => x.id === row.dataset.id
                         );
                         if (!p) return;
 
@@ -1018,14 +906,13 @@
                         if (btn.dataset.action === "removePlate") {
                             const id = row.dataset.id;
                             state.plates = state.plates.filter(
-                                (p) => p.id !== id,
+                                (p) => p.id !== id
                             );
                             renderInventory();
                             scheduleRecalc();
                         }
                     });
 
-                    // Escape clears focused input (total/bar/new weight/new available)
                     document.addEventListener("keydown", (e) => {
                         if (e.key !== "Escape") return;
                         const a = document.activeElement;
@@ -1033,11 +920,10 @@
                         else if (a === el.bar) el.clearBar.click();
                         else if (a === el.newWeight) el.newWeight.value = "";
                         else if (a === el.newAvailable)
-                            el.newAvailable.value = "0";
+                            el.newAvailable.value = "";
                     });
                 }
 
-                // ---- init ----
                 load();
                 syncInputs();
                 renderInventory();
