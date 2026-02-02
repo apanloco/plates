@@ -245,3 +245,35 @@ This keeps the UI clean for mobile use. Users quickly learn to enter valid numbe
 - Decimal precision: 2 decimal places
 - Works fully offline (only external dependency: Pico CSS from CDN)
 - Debounced recalculation (~60ms) for responsive feel without excessive computation
+
+---
+
+## Wishlist for Rewrite
+
+> Everything above describes the **current** application behavior. This section describes **changes** for the rewrite.
+
+### Remove Pico CSS dependency
+- Custom minimal CSS instead
+- System font stack (no web fonts)
+- Dark/light mode via `prefers-color-scheme` (automatic, no toggle)
+- No color tints for buttons - just rely on × and + symbols being universally understood
+
+### More compact UI
+
+**Layout:**
+- Target + Bar inputs on one line (if still clear what each is for - maybe inline labels or placeholders)
+- Remove section headers ("Inputs", "Plates") - context is obvious
+- Smaller app title, or remove entirely
+- Keep clear (×) buttons - they're valuable because they clear the entire input AND pop up the keyboard, making it fast to enter a new value
+
+**Results:**
+- Tighter/more compact result display - just essentials
+
+**Plate inventory:**
+- Keep table format (clear for editing)
+- Make rows tighter: smaller padding, smaller fonts, weight and count closer together
+
+### General principles
+- Everything as small as reasonably possible while staying usable
+- Ideally fits on one screen without scrolling (but don't assume all screens)
+- Minimal, beautiful, well thought out
