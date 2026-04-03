@@ -305,7 +305,7 @@
                         class="mono"
                         type="text"
                         inputmode="decimal"
-                        placeholder="25"
+                        placeholder="0"
                     />
                     <button
                         id="clearBar"
@@ -712,7 +712,6 @@
                 function renderResults(r) {
                     if (
                         el.target.value === "" ||
-                        el.bar.value === "" ||
                         r.kind === "invalid"
                     ) {
                         el.results.innerHTML = '<span class="muted">&mdash;</span>';
@@ -820,11 +819,10 @@
                     const barStr = el.bar.value;
 
                     const target = parseLocaleNumber(targetStr);
-                    const bar = parseLocaleNumber(barStr);
+                    const bar = barStr === "" ? 0 : parseLocaleNumber(barStr);
 
                     if (
                         targetStr === "" ||
-                        barStr === "" ||
                         !Number.isFinite(target) ||
                         !Number.isFinite(bar)
                     ) {
